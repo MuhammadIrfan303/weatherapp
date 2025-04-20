@@ -7,6 +7,11 @@ import SearchBar from "./SearchBar";
 import FavoriteLocations from "./FavouriteLocations";
 import { getWeatherData, getForecastData, getWeatherDataByCoords, getForecastDataByCoords } from './weatherService';
 import { FiSun, FiMoon, FiStar, FiMapPin, FiRefreshCw } from 'react-icons/fi';
+// Add these imports at the top
+import { auth, db } from '../firebase';
+import { doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+
 export default function WeatherDashboard() {
     const [darkMode, setDarkMode] = useState(true);
     const [city, setCity] = useState('Mumbai');
@@ -28,11 +33,80 @@ export default function WeatherDashboard() {
     useEffect(() => {
         localStorage.setItem('weatherFavorites', JSON.stringify(favorites));
     }, [favorites]);
-    const addToFavorites = () => {
+
+    // Add user state
+    const [user, setUser] = useState(null);
+
+    // Replace localStorage useEffects with Firebase sync
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                // Fetch favorites from Firestore
+                const fetchFavorites = async () => {
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                        if (userDoc.exists()) {
+                            setFavorites(userDoc.data().favorites || []);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching favorites:', error);
+                    }
+                };
+                fetchFavorites();
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    // Update addToFavorites function
+    const addToFavorites = async () => {
+        if (!user) {
+            setShowNotificationBanner(true);
+            return;
+        }
+
         if (!favorites.includes(city)) {
-            setFavorites([...favorites, city]);
+            const newFavorites = [...favorites, city];
+            setFavorites(newFavorites);
+
+            try {
+                await updateDoc(doc(db, 'users', user.uid), {
+                    favorites: newFavorites
+                });
+            } catch (error) {
+                console.error('Error updating favorites:', error);
+                setError('Failed to save favorite location');
+                setFavorites(favorites); // Revert on error
+            }
         }
     };
+
+    // Update toggleFavorite function
+    const toggleFavorite = async (location) => {
+        if (!user) {
+            setShowNotificationBanner(true);
+            return;
+        }
+
+        try {
+            const newFavorites = favorites.includes(location)
+                ? favorites.filter(fav => fav !== location)
+                : [...favorites, location];
+
+            setFavorites(newFavorites);
+
+            await updateDoc(doc(db, 'users', user.uid), {
+                favorites: newFavorites
+            });
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            setError('Failed to update favorite locations');
+            setFavorites(favorites); // Revert on error
+        }
+    };
+
     const fetchWeatherData = async (cityName) => {
         try {
             setLoading(true);
@@ -63,13 +137,13 @@ export default function WeatherDashboard() {
         setCity(searchCity);
     };
 
-    const toggleFavorite = (location) => {
-        if (favorites.includes(location)) {
-            setFavorites(favorites.filter(fav => fav !== location));
-        } else {
-            setFavorites([...favorites, location]);
-        }
-    };
+    // const toggleFavorite = (location) => {
+    //     if (favorites.includes(location)) {
+    //         setFavorites(favorites.filter(fav => fav !== location));
+    //     } else {
+    //         setFavorites([...favorites, location]);
+    //     }
+    // };
 
     const refreshData = () => {
         fetchWeatherData(city);
@@ -112,6 +186,7 @@ export default function WeatherDashboard() {
     useEffect(() => {
         getCurrentLocation();
     }, []);
+    console.log('Current time in Karachi:', new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi' }));
 
     // Add this state at the top with other state declarations
     const [showNotificationBanner, setShowNotificationBanner] = useState(true);
@@ -134,7 +209,7 @@ export default function WeatherDashboard() {
                         <div className="flex items-center gap-2">
                             <button
                                 className="px-3 py-1 text-sm rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-                                onClick={() => window.location.href = '/signup'}
+                                onClick={() => window.location.href = '/register'}
                             >
                                 Sign Up
                             </button>
