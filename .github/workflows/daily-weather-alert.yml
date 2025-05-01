@@ -2,7 +2,7 @@ name: Daily Weather Alerts
 
 on:
   schedule:
-    - cron: '30 6 * * *'  # Runs at 11:30 AM Pakistan time (UTC+5)
+    - cron: '32 6 * * *'  # Runs at 11:30 AM Pakistan time (UTC+5)
   workflow_dispatch:  # Allows manual trigger for testing
 
 jobs:
