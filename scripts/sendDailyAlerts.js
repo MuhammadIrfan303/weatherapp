@@ -2,10 +2,19 @@ const nodemailer = require('nodemailer');
 const fetch = require('node-fetch');
 const admin = require('firebase-admin');
 
-// Initialize Firebase
-admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_CONFIG))
-});
+// Initialize Firebase with proper error handling
+try {
+    if (!process.env.FIREBASE_CONFIG) {
+        throw new Error('Firebase configuration is missing');
+    }
+    admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_CONFIG))
+    });
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Firebase initialization error:', error);
+    process.exit(1);
+}
 
 const db = admin.firestore();
 
