@@ -52,7 +52,7 @@ const Register = () => {
                 weatherAlerts: []
             });
 
-            router.push('/dashboard');
+            router.push('/');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -227,7 +227,7 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3">
                         <button
                             type="button"
                             disabled={loading}
@@ -241,19 +241,7 @@ const Register = () => {
                             />
                             <span className="ml-2">Google</span>
                         </button>
-                        <button
-                            type="button"
-                            disabled={loading}
-                            onClick={() => handleSocialLogin('facebook')}
-                            className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700 disabled:opacity-50 cursor-pointer"
-                        >
-                            <img
-                                className="h-5 w-5"
-                                src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
-                                alt="Facebook"
-                            />
-                            <span className="ml-2">Facebook</span>
-                        </button>
+
                     </div>
                 </form>
             </div>

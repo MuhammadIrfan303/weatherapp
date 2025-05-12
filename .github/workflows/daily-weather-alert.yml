@@ -1,8 +1,8 @@
-name: Daily Weather Alerts
+ name: Daily Weather Alerts
 
 on:
   schedule:
-    - cron: '48 6 * * *'  # Runs at 11:30 AM Pakistan time (UTC+5)
+    - cron: '38 17 * * *'  # Runs at 11:30 AM Pakistan time (UTC+5)
   workflow_dispatch:  # Allows manual trigger for testing
 
 jobs:
@@ -10,17 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
-      
+          node-version: '18'
+
       - name: Install Dependencies
-        run: npm install nodemailer node-fetch@2 firebase-admin
-      
+        run: npm install nodemailer node-fetch@latest firebase-admin
+
       - name: Send Weather Alerts
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
-        run: node scripts/sendDailyAlerts.js
+        run: node sendDailyAlerts.js

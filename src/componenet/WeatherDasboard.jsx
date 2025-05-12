@@ -11,6 +11,7 @@ import { FiSun, FiMoon, FiStar, FiMapPin, FiRefreshCw } from 'react-icons/fi';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 
 export default function WeatherDashboard() {
     const [darkMode, setDarkMode] = useState(true);
@@ -234,6 +235,17 @@ export default function WeatherDashboard() {
                         >
                             {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
                         </button>
+
+                        {user && (
+                            <button
+                                onClick={() => signOut(auth)}
+                                className={`p-2 rounded-full flex items-center gap-2 ${darkMode ? 'bg-red-700 hover:bg-red-600' : 'bg-red-500 hover:bg-red-400'
+                                    } text-white`}
+                                title="Sign out"
+                            >
+                                <span className="hidden md:inline">Logout</span>
+                            </button>
+                        )}
 
                         <button
                             onClick={getCurrentLocation}

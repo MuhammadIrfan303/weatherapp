@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getWeatherData } from '@/lib/weather';
 import nodemailer from 'nodemailer';
-
 export async function POST(request) {
-
-
 
     try {
         const { email, favorites } = await request.json();
@@ -15,7 +12,6 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -23,9 +19,7 @@ export async function POST(request) {
                 pass: process.env.EMAIL_PASSWORD  // Changed from EMAIL_PASS to EMAIL_PASSWORD
             }
         });
-
         let alertMessage = `Good morning! Here's your daily weather update:\n\n`;
-
         // Use Promise.all with proper error handling
         const weatherResults = await Promise.all(
             favorites.map(city =>

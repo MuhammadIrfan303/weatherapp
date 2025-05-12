@@ -49,7 +49,7 @@ const TestWeatherAlert = () => {
                     value={userEmail}
                     onChange={(e) => setUserEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full p-2 border rounded mb-2 text-gray-800"
+                    className="w-full p-2 border rounded mb-2 text-white"
                 />
             </div>
             <button

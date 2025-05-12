@@ -2,6 +2,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+
+import toast, { Toaster } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { auth } from '@/firebase';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -9,11 +14,35 @@ const Login = () => {
         email: '',
         password: '',
     });
+    const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Add your login logic here
-        console.log('Login attempt:', formData);
+        if (!formData.email || !formData.password) {
+            throw new Error('All fields are required');
+        }
+        try {
+            const Credential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            console.log(Credential);
+            toast.success('Login successful');
+            router.push('/');
+        } catch (error) {
+            console.log(error);
+            toast.error(error.message);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            console.log(result);
+            toast.success('Login with Google successful');
+            router.push('/');
+        } catch (error) {
+            console.log(error);
+            toast.error(error.message);
+        }
     };
 
     const handleChange = (e) => {
@@ -22,6 +51,7 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+            <Toaster />
             <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-2xl">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
@@ -108,7 +138,7 @@ const Login = () => {
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
                         >
                             Sign in
                         </button>
@@ -123,21 +153,14 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3">
                         <button
                             type="button"
-                            className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700"
+                            onClick={handleGoogleSignIn}
+                            className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700 cursor-pointer"
                         >
                             <img className="h-5 w-5" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
                             <span className="ml-2">Google</span>
-                        </button>
-                        <button
-                            type="button"
-                            className="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700"
-                        >
-                            <img className="h-5 w-5" src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook" />
-
-                            <span className="ml-2">Facebook</span>
                         </button>
                     </div>
                 </form>
